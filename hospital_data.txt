@@ -1,0 +1,5 @@
+Doctors diagnose diseases and provide treatment.
+Nurses care for patients and support doctors in treatment.
+Hospitals provide medical care and treatment to patients.
+A clinic is a place where patients receive basic medical care.
+Pharmacists prepare and give medicines safely.

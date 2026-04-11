@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Multi-Agent Chatbot</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 60%;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            background-color: #3498db;
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .result-box {
+            background-color: #f9fafb;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .result-box p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .result-box h2, .result-box h3 {
+            color: #34495e;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .status-success {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-fallback {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .status-no-match {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Multi-Agent Chatbot</h1>
+
+        <form action="/ask" method="post">
+            <input type="text" name="question" placeholder="Ask a medical question..." required>
+            <button type="submit">Ask</button>
+        </form>
+
+        {% if result %}
+            <div class="result-box">
+                <h2>Result</h2>
+
+                <p><b>Agent:</b> {{ result.agent }}</p>
+                <p><b>Question:</b> {{ result.question }}</p>
+                <p><b>Final Answer:</b>
+                    {% if result.final_answer %}
+                        {{ result.final_answer }}
+                    {% else %}
+                        No answer found.
+                    {% endif %}
+                </p>
+
+                <p><b>Status:</b>
+                    {% if result.status == "success" %}
+                        <span class="status-success">{{ result.status }}</span>
+                    {% elif result.status == "fallback_success" %}
+                        <span class="status-fallback">{{ result.status }}</span>
+                    {% else %}
+                        <span class="status-no-match">{{ result.status }}</span>
+                    {% endif %}
+                </p>
+
+                {% if result.results and result.results|length > 0 %}
+                    <h3>Top Results</h3>
+                    <ul>
+                        {% for item in result.results %}
+                            <li>
+                                {{ item.answer }}
+                                {% if item.score is defined %}
+                                    (score: {{ item.score }})
+                                {% endif %}
+                                {% if item.source is defined %}
+                                    - source: {{ item.source }}
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No supporting results found.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
