@@ -1,12 +1,18 @@
-import string
+# agents.py
+
 import difflib
+from vector_store import chroma_search
 
 ignore_words = ["what", "is", "tell", "me", "about", "do", "the", "a", "an"]
 
 known_keywords = [
     "diabetes", "hypertension", "fever", "disease", "blood sugar",
+    "corona", "coronavirus", "covid", "covid-19", "virus", "infection",
     "insulin", "aspirin", "antibiotic", "antibiotics", "vaccine", "vaccines", "medicine",
-    "doctor", "doctors", "nurse", "nurses", "hospital", "hospitals", "clinic", "pharmacist", "pharmacists"
+    "doctor", "doctors", "nurse", "nurses", "hospital", "hospitals", "clinic",
+    "pharmacist", "dna", "cell", "protein", "photosynthesis", "gene", "genes",
+    "crispr", "mutation", "mutations", "rna", "mitochondria", "enzyme", "enzymes",
+    "nutrition", "carbohydrates", "vitamins", "minerals", "fat", "diet"
 ]
 
 typo_map = {
@@ -15,16 +21,14 @@ typo_map = {
     "insuline": "insulin",
     "nirse": "nurse",
     "hospitel": "hospital",
-    "docter": "doctor"
+    "docter": "doctor",
+    "coronaa": "corona",
+    "covidd": "covid",
+    "viruse": "virus"
 }
-
-def clean_text(text):
-    text = text.lower()
-    return text.translate(str.maketrans("", "", string.punctuation))
 
 def fix_typos(words):
     fixed_words = []
-
     for word in words:
         if word in typo_map:
             fixed_words.append(typo_map[word])
@@ -34,57 +38,16 @@ def fix_typos(words):
                 fixed_words.append(match[0])
             else:
                 fixed_words.append(word)
-
     return fixed_words
 
-def search_file(filename, question):
-    with open(filename, "r") as file:
-        lines = file.readlines()
-
-    question = clean_text(question)
-    filtered_words = [word for word in question.split() if word not in ignore_words]
-    filtered_words = fix_typos(filtered_words)
-
-    scored_lines = []
-
-    for line in lines:
-        line_clean = clean_text(line)
-        score = 0
-
-        for word in filtered_words:
-            if word in line_clean:
-                score += 1
-
-        if score > 0:
-            scored_lines.append({
-                "answer": line.strip(),
-                "score": score,
-                "source": filename
-            })
-
-    scored_lines.sort(key=lambda x: x["score"], reverse=True)
-    return scored_lines[:2]
-
-def disease_agent(question):
-    return search_file("disease_data.txt", question)
-
-def medicine_agent(question):
-    return search_file("medicine_data.txt", question)
-
-def hospital_agent(question):
-    return search_file("hospital_data.txt", question)
-
-def fallback_search(question):
-    all_results = []
-    all_results.extend(search_file("disease_data.txt", question))
-    all_results.extend(search_file("medicine_data.txt", question))
-    all_results.extend(search_file("hospital_data.txt", question))
-
-    all_results.sort(key=lambda x: x["score"], reverse=True)
-    return all_results[:2]
-
 def build_response(agent_name, question, results, status):
-    final_answer = results[0]["answer"] if results else "No answer found."
+    strong_results = [r for r in results if r["score"] > 0.3]
+    if strong_results:
+        final_answer = " ".join([
+            f"{i+1}. {r['answer']}" for i, r in enumerate(strong_results)
+        ])
+    else:
+        final_answer = "No strong supporting result found in the knowledge base."
     return {
         "agent": agent_name,
         "question": question,
@@ -94,30 +57,62 @@ def build_response(agent_name, question, results, status):
     }
 
 def route_question(question):
-    question_lower = clean_text(question)
-    words = [word for word in question_lower.split() if word not in ignore_words]
+    words = question.lower().split()
+    words = [w for w in words if w not in ignore_words]
     words = fix_typos(words)
     fixed_question = " ".join(words)
 
-    if any(word in fixed_question for word in ["diabetes", "hypertension", "fever", "disease", "blood sugar"]):
-        results = disease_agent(fixed_question)
-        if results:
-            return build_response("disease_agent", question, results, "success")
+    disease_keywords = [
+        "diabetes", "hypertension", "fever", "disease", "blood sugar",
+        "corona", "coronavirus", "covid", "covid-19", "virus", "infection",
+        "cancer", "tumor", "tumour", "chemotherapy", "metastasis",
+        "asthma", "alzheimer"
+    ]
 
-    elif any(word in fixed_question for word in ["insulin", "aspirin", "antibiotic", "antibiotics", "vaccine", "vaccines", "medicine"]):
-        results = medicine_agent(fixed_question)
-        if results:
-            return build_response("medicine_agent", question, results, "success")
+    medicine_keywords = [
+        "insulin", "aspirin", "antibiotic", "antibiotics",
+        "vaccine", "vaccines", "medicine", "paracetamol", "ibuprofen"
+    ]
 
-    elif any(word in fixed_question for word in ["doctor", "doctors", "nurse", "nurses", "hospital", "hospitals", "clinic", "pharmacist", "pharmacists"]):
-        results = hospital_agent(fixed_question)
-        if results:
-            return build_response("hospital_agent", question, results, "success")
+    hospital_keywords = [
+        "doctor", "doctors", "nurse", "nurses",
+        "hospital", "hospitals", "clinic",
+        "pharmacist", "pharmacists", "icu", "surgeon", "radiologist"
+    ]
 
-    fallback_results = fallback_search(fixed_question)
+    # Biology checked BEFORE disease to avoid wrong routing
+    biology_keywords = [
+        "dna", "cell", "cells", "protein", "photosynthesis",
+        "gene", "genes", "crispr", "mutation", "mutations",
+        "rna", "mitochondria", "enzyme", "enzymes", "ribosome",
+        "mitosis", "meiosis", "genome", "chromosome", "helix"
+    ]
 
-    if fallback_results:
-        return build_response("fallback_search", question, fallback_results, "fallback_success")
+    nutrition_keywords = [
+        "nutrition", "carbohydrates", "vitamins", "minerals",
+        "fat", "diet", "fiber", "calories", "omega"
+    ]
+
+    # Route to correct agent and search Chroma
+    if any(word in fixed_question for word in biology_keywords):
+        results = chroma_search(fixed_question, "biology_agent")
+        return build_response("biology_agent", question, results, "success")
+
+    elif any(word in fixed_question for word in disease_keywords):
+        results = chroma_search(fixed_question, "disease_agent")
+        return build_response("disease_agent", question, results, "success")
+
+    elif any(word in fixed_question for word in medicine_keywords):
+        results = chroma_search(fixed_question, "medicine_agent")
+        return build_response("medicine_agent", question, results, "success")
+
+    elif any(word in fixed_question for word in hospital_keywords):
+        results = chroma_search(fixed_question, "hospital_agent")
+        return build_response("hospital_agent", question, results, "success")
+
+    elif any(word in fixed_question for word in nutrition_keywords):
+        results = chroma_search(fixed_question, "nutrition_agent")
+        return build_response("nutrition_agent", question, results, "success")
 
     return {
         "agent": "unknown",

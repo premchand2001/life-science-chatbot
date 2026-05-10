@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f0f4ff, #f7f9fc);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 40px auto;
+        }
+
+        h1 {
+            color: #1f2937;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .section h2 {
+            color: #1f2937;
+            font-size: 18px;
+            margin: 0 0 16px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f3f4f6;
+            color: #374151;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #4b5563;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .agent-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .biology { background:#e0e7ff; color:#3730a3; }
+        .disease { background:#fee2e2; color:#991b1b; }
+        .medicine { background:#d1fae5; color:#065f46; }
+        .hospital { background:#fef3c7; color:#92400e; }
+        .nutrition { background:#fce7f3; color:#9d174d; }
+        .react { background:#f3e8ff; color:#6b21a8; }
+        .openai { background:#e0f2fe; color:#0369a1; }
+        .unknown { background:#f3f4f6; color:#374151; }
+
+        .role-user {
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        .role-bot {
+            color: #059669;
+            font-weight: bold;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #2563eb;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .refresh-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #059669;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .refresh-btn:hover {
+            background-color: #047857;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #9ca3af;
+            padding: 30px;
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        <p class="subtitle">Live overview of your Multi-Agent Life Science Chatbot</p>
+
+        <a href="/ui" class="back-btn">← Back to Chatbot</a>
+        <a href="/admin" class="refresh-btn">↻ Refresh</a>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.total_sessions }}</div>
+                <div class="stat-label">Total Sessions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.total_messages }}</div>
+                <div class="stat-label">Total Messages</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.total_questions }}</div>
+                <div class="stat-label">Questions Asked</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.total_pdfs }}</div>
+                <div class="stat-label">PDFs Ingested</div>
+            </div>
+        </div>
+
+        <!-- Agent Usage -->
+        <div class="section">
+            <h2>Agent Usage</h2>
+            {% if stats.agent_counts %}
+                <table>
+                    <tr>
+                        <th>Agent</th>
+                        <th>Times Used</th>
+                    </tr>
+                    {% for agent, count in stats.agent_counts.items() %}
+                        <tr>
+                            <td>
+                                <span class="agent-badge {{ agent.replace('_agent','').replace('_fallback','').replace('openai','openai') }}">
+                                    {{ agent }}
+                                </span>
+                            </td>
+                            <td>{{ count }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p class="empty-state">No agent data yet. Start chatting!</p>
+            {% endif %}
+        </div>
+
+        <!-- Recent Messages -->
+        <div class="section">
+            <h2>Recent Conversations</h2>
+            {% if messages %}
+                <table>
+                    <tr>
+                        <th>Time</th>
+                        <th>Role</th>
+                        <th>Message</th>
+                        <th>Agent</th>
+                    </tr>
+                    {% for msg in messages %}
+                        <tr>
+                            <td>{{ msg.timestamp }}</td>
+                            <td>
+                                {% if msg.role == "user" %}
+                                    <span class="role-user">User</span>
+                                {% else %}
+                                    <span class="role-bot">Bot</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ msg.message[:100] }}{% if msg.message|length > 100 %}...{% endif %}</td>
+                            <td>
+                                {% if msg.agent %}
+                                    <span class="agent-badge {{ msg.agent.replace('_agent','').replace('_fallback','') }}">
+                                        {{ msg.agent }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p class="empty-state">No conversations yet. Start chatting!</p>
+            {% endif %}
+        </div>
+
+        <!-- All Sessions -->
+        <div class="section">
+            <h2>All Sessions</h2>
+            {% if sessions %}
+                <table>
+                    <tr>
+                        <th>Session ID</th>
+                        <th>Messages</th>
+                        <th>Started</th>
+                        <th>Last Active</th>
+                    </tr>
+                    {% for session in sessions %}
+                        <tr>
+                            <td>{{ session.session_id[:20] }}...</td>
+                            <td>{{ session.message_count }}</td>
+                            <td>{{ session.started_at }}</td>
+                            <td>{{ session.last_active }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p class="empty-state">No sessions yet.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</body>
+</html>

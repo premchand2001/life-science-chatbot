@@ -6,76 +6,107 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
+            background: linear-gradient(135deg, #e8f3ff, #f7f9fc);
             margin: 0;
             padding: 0;
         }
 
         .container {
-            width: 60%;
+            width: 70%;
             margin: 40px auto;
             background: white;
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
         }
 
         h1 {
             text-align: center;
-            color: #2c3e50;
+            color: #1f2937;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 25px;
         }
 
         form {
             display: flex;
             gap: 10px;
-            margin-top: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         input[type="text"] {
             flex: 1;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
+            padding: 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
             font-size: 16px;
         }
 
         button {
-            padding: 12px 20px;
+            padding: 14px 22px;
             border: none;
-            background-color: #3498db;
+            background-color: #2563eb;
             color: white;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 16px;
             cursor: pointer;
         }
 
         button:hover {
-            background-color: #2980b9;
+            background-color: #1d4ed8;
         }
 
-        .result-box {
-            background-color: #f9fafb;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
+        .chat-box {
+            margin-top: 20px;
         }
 
-        .result-box p {
-            margin: 10px 0;
+        .message {
+            padding: 15px;
+            border-radius: 14px;
+            margin-bottom: 14px;
+        }
+
+        .user-message {
+            background-color: #dbeafe;
+            text-align: right;
+        }
+
+        .bot-message {
+            background-color: #f3f4f6;
+            text-align: left;
+        }
+
+        .meta {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .answer {
             font-size: 16px;
+            color: #111827;
+            line-height: 1.5;
         }
 
-        .result-box h2, .result-box h3 {
-            color: #34495e;
+        .details {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
         }
 
-        ul {
-            padding-left: 20px;
-        }
-
-        li {
-            margin-bottom: 8px;
+        .agent-badge {
+            display: inline-block;
+            background-color: #eef2ff;
+            color: #3730a3;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: bold;
         }
 
         .status-success {
@@ -92,43 +123,352 @@
             color: red;
             font-weight: bold;
         }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .clear-btn {
+            background-color: #ef4444;
+            margin-top: 10px;
+        }
+
+        .clear-btn:hover {
+            background-color: #dc2626;
+        }
+
+        .pdf-section {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.pdf-section h3 {
+    margin: 0 0 14px 0;
+    color: #166534;
+    font-size: 16px;
+}
+
+.pdf-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.pdf-row input[type="file"] {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 14px;
+    background: white;
+}
+
+.pdf-row select {
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 14px;
+    background: white;
+    color: #1f2937;
+}
+
+.pdf-row button {
+    padding: 10px 20px;
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.pdf-row button:hover {
+    background-color: #15803d;
+}
+
+.upload-message {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background-color: #dcfce7;
+    border-radius: 10px;
+    color: #166534;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.stream-section {
+    margin-bottom: 25px;
+}
+
+.stream-box {
+    background-color: #f8faff;
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.stream-box h3 {
+    margin: 0 0 14px 0;
+    color: #1e40af;
+    font-size: 16px;
+}
+
+.stream-input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.stream-input-row input {
+    flex: 1;
+    padding: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 16px;
+}
+
+.stream-input-row button {
+    padding: 14px 22px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.stream-input-row button:hover {
+    background-color: #1d4ed8;
+}
+
+#stream-output {
+    min-height: 60px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #111827;
+    white-space: pre-wrap;
+}
+
+.typing-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: #2563eb;
+    border-radius: 50%;
+    animation: blink 0.7s infinite;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.react-section {
+    background-color: #fefce8;
+    border: 1px solid #fde047;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.react-section h3 {
+    margin: 0 0 14px 0;
+    color: #854d0e;
+    font-size: 16px;
+}
+
+.react-input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.react-input-row input {
+    flex: 1;
+    padding: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 16px;
+}
+
+.react-input-row button {
+    padding: 14px 22px;
+    background-color: #ca8a04;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.react-input-row button:hover {
+    background-color: #a16207;
+}
+
+.reasoning-steps {
+    background: white;
+    border: 1px solid #fde047;
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 14px;
+}
+
+.reasoning-step {
+    padding: 8px 0;
+    border-bottom: 1px solid #fef9c3;
+    font-size: 14px;
+}
+
+.reasoning-step:last-child {
+    border-bottom: none;
+}
+
+.step-thought {
+    color: #854d0e;
+    font-weight: bold;
+}
+
+.step-observation {
+    color: #166534;
+    margin-top: 4px;
+}
+
     </style>
 </head>
+
 <body>
     <div class="container">
-        <h1>Multi-Agent Chatbot</h1>
+        <h1>Multi-Agent Life Science Chatbot</h1>
+        <p class="subtitle">Ask medical, biology, medicine, hospital, or nutrition questions.</p>
 
         <form action="/ask" method="post">
-            <input type="text" name="question" placeholder="Ask a medical question..." required>
+            <input type="text" name="question" placeholder="Ask your question..." required>
             <button type="submit">Ask</button>
         </form>
 
+        <!-- Streaming Chat Section -->
+<div class="stream-section">
+    <div class="stream-box">
+        <h3>Ask with Live Streaming</h3>
+        <div class="stream-input-row">
+            <input
+                type="text"
+                id="stream-question"
+                placeholder="Ask a question and see live response..."
+            />
+            <button onclick="askStream()">Ask Live</button>
+        </div>
+        <div id="stream-output">Response will appear here...</div>
+    </div>
+</div>
+
+        <form action="/clear" method="post">
+            <button class="clear-btn" type="submit">Clear Chat</button>
+        </form>
+
+<!-- ReAct Reasoning Section -->
+<div class="react-section">
+    <h3>Ask with ReAct Reasoning (shows thinking steps)</h3>
+    <form action="/react" method="post">
+        <div class="react-input-row">
+            <input type="text" name="question"
+                placeholder="Ask a question to see agent reasoning..."
+                required>
+            <button type="submit">Ask ReAct</button>
+        </div>
+    </form>
+</div>
+
+{% if result and result.reasoning_steps %}
+    <div class="reasoning-steps">
+        <h4 style="margin:0 0 10px 0; color:#854d0e">
+            Agent Reasoning Steps
+        </h4>
+        {% for step in result.reasoning_steps %}
+            <div class="reasoning-step">
+                <div class="step-thought">
+                    Thought: {{ step.thought }}
+                </div>
+                <div class="step-thought">
+                    Action: {{ step.action }} →
+                    {{ step.input }}
+                </div>
+                <div class="step-observation">
+                    Observation: {{ step.observation }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+        <!-- PDF Upload Section -->
+<div class="pdf-section">
+    <h3>Upload PDF to Knowledge Base</h3>
+    <form action="/upload-pdf" method="post" enctype="multipart/form-data">
+        <div class="pdf-row">
+            <input type="file" name="file" accept=".pdf" required>
+            <select name="agent_name" required>
+                <option value="">Select Agent...</option>
+                <option value="biology_agent">Biology Agent</option>
+                <option value="disease_agent">Disease Agent</option>
+                <option value="medicine_agent">Medicine Agent</option>
+                <option value="hospital_agent">Hospital Agent</option>
+                <option value="nutrition_agent">Nutrition Agent</option>
+            </select>
+            <button type="submit">Upload PDF</button>
+        </div>
+    </form>
+
+    {% if upload_message %}
+        <p class="upload-message">{{ upload_message }}</p>
+    {% endif %}
+</div>
+
+        {% if history %}
+            <div class="chat-box">
+                {% for item in history %}
+                    <div class="message user-message">
+                        <div class="meta">You</div>
+                        <div class="answer">{{ item.question }}</div>
+                    </div>
+
+                    <div class="message bot-message">
+                        <div class="meta">
+                            Bot · <span class="agent-badge">{{ item.agent }}</span>
+                            · Status:
+                            {% if item.status == "success" %}
+                                <span class="status-success">{{ item.status }}</span>
+                            {% elif item.status == "fallback_success" or item.status == "ai_success" %}
+                                <span class="status-fallback">{{ item.status }}</span>
+                            {% else %}
+                                <span class="status-no-match">{{ item.status }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="answer">{{ item.final_answer }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         {% if result %}
-            <div class="result-box">
-                <h2>Result</h2>
-
-                <p><b>Agent:</b> {{ result.agent }}</p>
-                <p><b>Question:</b> {{ result.question }}</p>
-                <p><b>Final Answer:</b>
-                    {% if result.final_answer %}
-                        {{ result.final_answer }}
-                    {% else %}
-                        No answer found.
-                    {% endif %}
-                </p>
-
-                <p><b>Status:</b>
-                    {% if result.status == "success" %}
-                        <span class="status-success">{{ result.status }}</span>
-                    {% elif result.status == "fallback_success" %}
-                        <span class="status-fallback">{{ result.status }}</span>
-                    {% else %}
-                        <span class="status-no-match">{{ result.status }}</span>
-                    {% endif %}
-                </p>
+            <div class="details">
+                <h3>Latest Retrieval Details</h3>
 
                 {% if result.results and result.results|length > 0 %}
-                    <h3>Top Results</h3>
                     <ul>
                         {% for item in result.results %}
                             <li>
@@ -148,5 +488,64 @@
             </div>
         {% endif %}
     </div>
+
+    <script>
+async function askStream() {
+    const question = document.getElementById("stream-question").value.trim();
+    if (!question) return;
+
+    const output = document.getElementById("stream-output");
+
+    // Clear previous output and show typing indicator
+    output.innerHTML = '<span class="typing-indicator"></span>';
+
+    // Build form data
+    const formData = new FormData();
+    formData.append("question", question);
+
+    try {
+        const response = await fetch("/stream", {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            output.textContent = "Error: Could not get response.";
+            return;
+        }
+
+        // Read the stream token by token
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullText = "";
+
+        // Clear typing indicator before first token
+        output.textContent = "";
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const token = decoder.decode(value, { stream: true });
+            fullText += token;
+            output.textContent = fullText;
+
+            // Auto scroll to bottom
+            output.scrollTop = output.scrollHeight;
+        }
+
+    } catch (error) {
+        output.textContent = "Error: " + error.message;
+    }
+}
+
+// Allow pressing Enter to submit
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("stream-question").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") askStream();
+    });
+});
+</script>
+
 </body>
 </html>

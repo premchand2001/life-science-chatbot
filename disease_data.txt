@@ -2,3 +2,17 @@ Diabetes is a disease where blood sugar levels are too high.
 Hypertension is another name for high blood pressure.
 Fever is often a sign of infection or illness.
 Blood sugar testing helps monitor diabetes.
+Corona usually refers to coronavirus, a family of viruses that can cause respiratory illness.
+
+COVID-19 is caused by the SARS-CoV-2 coronavirus.
+
+Common COVID-19 symptoms include fever, cough, fatigue, and breathing difficulty.
+
+Vaccines help reduce severe illness caused by COVID-19.
+Cancer is a disease where abnormal cells grow uncontrollably in the body.
+
+Cancer can spread to other parts of the body through a process called metastasis.
+
+Common cancer treatments include chemotherapy, radiation therapy, surgery, and immunotherapy.
+
+Early detection of cancer can improve treatment outcomes.
