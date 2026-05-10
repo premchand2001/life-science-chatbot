@@ -2,11 +2,15 @@
 
 import os
 from pypdf import PdfReader
-from vector_store import chroma_search
 from chromadb import PersistentClient
-from sentence_transformers import SentenceTransformer
+from langchain_openai import OpenAIEmbeddings
+from dotenv import load_dotenv
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+load_dotenv()
+
+embeddings_model = OpenAIEmbeddings(
+    api_key=os.getenv("OPENAI_API_KEY")
+)
 client = PersistentClient(path="./chroma_db")
 
 def extract_text_from_pdf(pdf_path: str) -> list[str]:
@@ -41,21 +45,15 @@ def extract_text_from_pdf(pdf_path: str) -> list[str]:
 def ingest_pdf(pdf_path: str, agent_name: str):
     """
     Ingests a PDF into the Chroma vector store under a specific agent.
-
-    pdf_path   = path to your PDF file
-    agent_name = which agent owns this knowledge
-                 e.g. 'biology_agent', 'disease_agent', 'medicine_agent'
     """
     print(f"\nIngesting: {os.path.basename(pdf_path)} → {agent_name}")
 
-    # Extract text chunks from PDF
     chunks = extract_text_from_pdf(pdf_path)
 
     if not chunks:
         print("  No text found in PDF. It may be a scanned image PDF.")
         return
 
-    # Get or create the Chroma collection for this agent
     collection = client.get_or_create_collection(name=agent_name)
     existing = collection.get()
     existing_ids = set(existing["ids"])
@@ -70,11 +68,11 @@ def ingest_pdf(pdf_path: str, agent_name: str):
     for i, chunk in enumerate(chunks):
         doc_id = f"{filename}_chunk_{i}"
 
-        # Skip if already ingested
         if doc_id in existing_ids:
             continue
 
-        embedding = model.encode(chunk).tolist()
+        # Now uses OpenAI embeddings instead of sentence-transformers
+        embedding = embeddings_model.embed_query(chunk)
         new_texts.append(chunk)
         new_embeddings.append(embedding)
         new_ids.append(doc_id)

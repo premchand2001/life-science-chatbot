@@ -1,46 +1,36 @@
 # semantic_rag.py
 
-from sentence_transformers import SentenceTransformer, util
+from langchain_openai import OpenAIEmbeddings
 from knowledge_base import documents
+import os
+from dotenv import load_dotenv
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+load_dotenv()
 
-# Pre-encode all documents at startup
-document_embeddings = {}
-for agent, texts in documents.items():
-    document_embeddings[agent] = model.encode(texts, convert_to_tensor=True)
+embeddings_model = OpenAIEmbeddings(
+    api_key=os.getenv("OPENAI_API_KEY")
+)
 
 def semantic_search(question, agent_name=None, top_k=3):
-    query_embedding = model.encode(question, convert_to_tensor=True)
+    query_embedding = embeddings_model.embed_query(question)
 
-    if agent_name and agent_name in documents:
-        texts = documents[agent_name]
-        embeddings = document_embeddings[agent_name]
-        scores = util.cos_sim(query_embedding, embeddings)[0]
-        ranked = sorted(
-            zip(texts, scores),
-            key=lambda x: float(x[1]),
-            reverse=True
-        )[:top_k]
-        return [
-            {"answer": text, "score": round(float(score), 4), "source": agent_name}
-            for text, score in ranked
-        ]
-
-    # Search across all agents if no specific agent given
     all_results = []
-    for agent, texts in documents.items():
-        embeddings = document_embeddings[agent]
-        scores = util.cos_sim(query_embedding, embeddings)[0]
-        ranked = sorted(
-            zip(texts, scores),
-            key=lambda x: float(x[1]),
-            reverse=True
-        )[:top_k]
-        for text, score in ranked:
+    search_agents = [agent_name] if agent_name else list(documents.keys())
+
+    for agent in search_agents:
+        if agent not in documents:
+            continue
+        texts = documents[agent]
+        for text in texts:
+            text_embedding = embeddings_model.embed_query(text)
+            # Cosine similarity
+            dot = sum(a*b for a, b in zip(query_embedding, text_embedding))
+            mag1 = sum(a**2 for a in query_embedding) ** 0.5
+            mag2 = sum(b**2 for b in text_embedding) ** 0.5
+            score = dot / (mag1 * mag2) if mag1 and mag2 else 0
             all_results.append({
                 "answer": text,
-                "score": round(float(score), 4),
+                "score": round(score, 4),
                 "source": agent
             })
 
