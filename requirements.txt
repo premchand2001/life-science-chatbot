@@ -3,9 +3,12 @@ uvicorn
 jinja2
 python-multipart
 openai
-sentence-transformers
 python-dotenv
 chromadb
 pypdf
 fpdf2
-sqlalchemy
+langchain
+langchain-openai
+langchain-community
+langchain-core
+langgraph
