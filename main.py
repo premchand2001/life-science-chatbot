@@ -20,6 +20,10 @@ templates = Jinja2Templates(directory="templates")
 # Initialize database on startup
 init_db()
 
+# Auto-rebuild Chroma vector store on startup
+from vector_store import build_vector_store
+build_vector_store()
+
 # In-memory for current session
 conversation_memory = []
 chat_history = []
