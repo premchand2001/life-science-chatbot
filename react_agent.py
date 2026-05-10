@@ -1,12 +1,11 @@
 # react_agent.py
+# Now uses proper MCP tool schemas
 
 from langchain_openai import ChatOpenAI
-from langchain_core.tools import tool
 from langchain_core.messages import HumanMessage, ToolMessage
-from vector_store import chroma_search
+from mcp_tools import get_mcp_tools, get_mcp_schemas
 from dotenv import load_dotenv
 import os
-import json
 
 load_dotenv()
 
@@ -16,47 +15,10 @@ llm = ChatOpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
 )
 
-# ── Define tools ──────────────────────────────────────────────
+# Load MCP tools
+tools = get_mcp_tools()
 
-@tool
-def search_biology(query: str) -> str:
-    """Search biology knowledge base for DNA, cells, genes, proteins, CRISPR."""
-    results = chroma_search(query, agent_name="biology_agent", top_k=3)
-    return "\n".join([r["answer"] for r in results]) if results else "No results found."
-
-@tool
-def search_disease(query: str) -> str:
-    """Search disease knowledge base for diabetes, cancer, COVID-19, infections."""
-    results = chroma_search(query, agent_name="disease_agent", top_k=3)
-    return "\n".join([r["answer"] for r in results]) if results else "No results found."
-
-@tool
-def search_medicine(query: str) -> str:
-    """Search medicine knowledge base for insulin, antibiotics, vaccines."""
-    results = chroma_search(query, agent_name="medicine_agent", top_k=3)
-    return "\n".join([r["answer"] for r in results]) if results else "No results found."
-
-@tool
-def search_hospital(query: str) -> str:
-    """Search hospital knowledge base for doctors, nurses, clinics."""
-    results = chroma_search(query, agent_name="hospital_agent", top_k=3)
-    return "\n".join([r["answer"] for r in results]) if results else "No results found."
-
-@tool
-def search_nutrition(query: str) -> str:
-    """Search nutrition knowledge base for vitamins, diet, minerals."""
-    results = chroma_search(query, agent_name="nutrition_agent", top_k=3)
-    return "\n".join([r["answer"] for r in results]) if results else "No results found."
-
-tools = [
-    search_biology,
-    search_disease,
-    search_medicine,
-    search_hospital,
-    search_nutrition
-]
-
-# Bind tools to LLM
+# Bind MCP tools to LLM
 llm_with_tools = llm.bind_tools(tools)
 
 # Tool name to function map
@@ -64,13 +26,15 @@ tool_map = {t.name: t for t in tools}
 
 def run_react_agent(question: str) -> dict:
     """
-    Manual ReAct loop using tool calling.
-    Shows reasoning steps clearly.
+    Runs ReAct agent using MCP tools.
+    Shows reasoning steps and which MCP tool was used.
     """
     messages = [
         HumanMessage(content=f"""You are a life sciences AI assistant.
-Use the available tools to search for relevant information, 
-then provide a detailed answer.
+You have access to MCP tools that can search knowledge bases
+and real external APIs like OpenFDA and ClinicalTrials.gov.
+
+Use the most relevant tool(s) to answer this question accurately.
 
 Question: {question}
 """)
@@ -84,7 +48,7 @@ Question: {question}
         response = llm_with_tools.invoke(messages)
         messages.append(response)
 
-        # If no tool calls — we have final answer
+        # No tool calls means we have final answer
         if not response.tool_calls:
             final_answer = response.content
             break
@@ -94,22 +58,27 @@ Question: {question}
             tool_name = tool_call["name"]
             tool_input = tool_call["args"]
 
-            # Record reasoning step
+            # Get MCP schema for this tool
+            from mcp_tools import MCP_TOOL_SCHEMAS
+            schema = MCP_TOOL_SCHEMAS.get(tool_name, {})
+
+            # Record reasoning step with MCP info
             reasoning_steps.append({
-                "thought": f"I need to search for information about this topic",
+                "thought": f"Using MCP tool to find relevant information",
                 "action": tool_name,
-                "input": str(tool_input.get("query", "")),
-                "observation": ""
+                "input": str(tool_input),
+                "observation": "",
+                "mcp_schema": schema.get("description", "")
             })
 
-            # Run the tool
+            # Run the MCP tool
             if tool_name in tool_map:
                 observation = tool_map[tool_name].invoke(tool_input)
             else:
-                observation = "Tool not found."
+                observation = "MCP tool not found."
 
-            # Update observation in reasoning steps
-            reasoning_steps[-1]["observation"] = str(observation)[:300]
+            # Update observation
+            reasoning_steps[-1]["observation"] = str(observation)[:400]
 
             # Add tool result to messages
             messages.append(
@@ -119,7 +88,7 @@ Question: {question}
                 )
             )
 
-    # If no final answer yet, get one
+    # Get final answer if not yet received
     if not final_answer:
         final_response = llm_with_tools.invoke(messages)
         final_answer = final_response.content or "No answer found."
@@ -129,3 +98,14 @@ Question: {question}
         "reasoning_steps": reasoning_steps,
         "status": "react_success"
     }
+
+def get_available_mcp_tools() -> list:
+    """Returns list of available MCP tool names and descriptions."""
+    schemas = get_mcp_schemas()
+    return [
+        {
+            "name": name,
+            "description": schema["description"]
+        }
+        for name, schema in schemas.items()
+    ]

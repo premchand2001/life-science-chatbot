@@ -1,5 +1,6 @@
 # main.py
 
+from mcp_tools import get_mcp_schemas, get_mcp_tools
 from fastapi import FastAPI, Request, Form, UploadFile, File
 from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
@@ -391,3 +392,74 @@ def admin_dashboard(request: Request):
             "sessions": sessions
         }
     )
+
+# MCP Schema endpoint — shows all available MCP tools
+@app.get("/mcp/schemas")
+def mcp_schemas():
+    """
+    Returns all MCP tool schemas.
+    This is what your boss wants to see — proper MCP documentation.
+    """
+    schemas = get_mcp_schemas()
+    return {
+        "mcp_version": "1.0",
+        "server_name": "life-science-chatbot-mcp",
+        "description": "MCP server for Life Sciences Multi-Agent Chatbot",
+        "total_tools": len(schemas),
+        "tools": schemas
+    }
+
+# MCP Tool test endpoint
+@app.post("/mcp/run-tool")
+async def run_mcp_tool(request: Request):
+    """
+    Runs a specific MCP tool by name.
+    Useful for testing individual tools.
+    """
+    body = await request.json()
+    tool_name = body.get("tool_name")
+    tool_input = body.get("input", {})
+
+    tools = get_mcp_tools()
+    tool_map = {t.name: t for t in tools}
+
+    if tool_name not in tool_map:
+        return {
+            "error": f"Tool '{tool_name}' not found",
+            "available_tools": list(tool_map.keys())
+        }
+
+    try:
+        result = tool_map[tool_name].invoke(tool_input)
+        return {
+            "tool_name": tool_name,
+            "input": tool_input,
+            "result": result,
+            "status": "success"
+        }
+    except Exception as e:
+        return {
+            "tool_name": tool_name,
+            "error": str(e),
+            "status": "error"
+        }
+
+# MCP FDA drug search endpoint
+@app.get("/mcp/fda/{drug_name}")
+def fda_drug_search(drug_name: str):
+    """
+    Direct FDA drug lookup via MCP tool.
+    """
+    from mcp_tools import search_fda_drug
+    result = search_fda_drug.invoke({"drug_name": drug_name})
+    return result
+
+# MCP Clinical trials endpoint
+@app.get("/mcp/trials/{condition}")
+def clinical_trials_search(condition: str):
+    """
+    Search real clinical trials via MCP tool.
+    """
+    from mcp_tools import search_clinical_trials
+    result = search_clinical_trials.invoke({"condition": condition})
+    return {"condition": condition, "trials": result}
