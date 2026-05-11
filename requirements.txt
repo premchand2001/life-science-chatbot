@@ -12,3 +12,6 @@ langchain-openai
 langchain-community
 langchain-core
 langgraph
+weaviate-client
+sentence-transformers
+requests
