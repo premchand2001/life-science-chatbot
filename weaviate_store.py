@@ -1,20 +1,28 @@
 # weaviate_store.py
-# Weaviate vector database integration (replaces Chroma)
+# Weaviate vector database integration
 
 import weaviate
 from weaviate.classes.init import Auth
-from weaviate.classes.config import Configure, Property, DataType
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from weaviate.classes.config import Property, DataType
 from knowledge_base import documents
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Hugging Face embedding model — exactly as boss requested
-hf_embeddings = HuggingFaceEmbeddings(
-    model_name="all-MiniLM-L6-v2"
-)
+# Smart switcher — HuggingFace locally, OpenAI on Render cloud
+if os.getenv("RENDER"):
+    from langchain_openai import OpenAIEmbeddings
+    hf_embeddings = OpenAIEmbeddings(
+        api_key=os.getenv("OPENAI_API_KEY")
+    )
+    print("Using OpenAI embeddings (cloud deployment)")
+else:
+    from langchain_huggingface import HuggingFaceEmbeddings
+    hf_embeddings = HuggingFaceEmbeddings(
+        model_name="all-MiniLM-L6-v2"
+    )
+    print("Using HuggingFace embeddings (local development)")
 
 def get_weaviate_client():
     """Connect to Weaviate cloud cluster."""
@@ -27,14 +35,14 @@ def get_weaviate_client():
 def build_weaviate_store():
     """
     Loads all documents from knowledge_base.py into Weaviate.
-    Uses HuggingFace embeddings as boss requested.
+    Uses HuggingFace locally and OpenAI on cloud.
     """
     print("Building Weaviate vector store...")
     client = get_weaviate_client()
 
     try:
         for agent_name, texts in documents.items():
-            # Collection name — capitalize first letter
+            # Collection name — capitalize properly
             collection_name = agent_name.replace("_", " ").title().replace(" ", "")
 
             # Create collection if it doesn't exist
@@ -61,13 +69,15 @@ def build_weaviate_store():
             collection = client.collections.get(collection_name)
 
             # Check existing count
-            existing_count = len(collection.query.fetch_objects(limit=1000).objects)
+            existing_count = len(
+                collection.query.fetch_objects(limit=1000).objects
+            )
 
             if existing_count >= len(texts):
                 print(f"  ⏭️  {agent_name}: already up to date")
                 continue
 
-            # Add documents with HuggingFace embeddings
+            # Add documents with embeddings
             with collection.batch.dynamic() as batch:
                 for i, text in enumerate(texts):
                     embedding = hf_embeddings.embed_query(text)
@@ -89,7 +99,8 @@ def build_weaviate_store():
 
 def weaviate_search(question: str, agent_name: str = None, top_k: int = 3) -> list:
     """
-    Search Weaviate for most relevant documents using HuggingFace embeddings.
+    Search Weaviate for most relevant documents.
+    Uses HuggingFace locally and OpenAI on cloud.
     """
     client = get_weaviate_client()
 
