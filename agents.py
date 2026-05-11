@@ -1,7 +1,7 @@
 # agents.py
 
 import difflib
-from vector_store import chroma_search
+from weaviate_store import weaviate_search
 
 ignore_words = ["what", "is", "tell", "me", "about", "do", "the", "a", "an"]
 
@@ -95,23 +95,23 @@ def route_question(question):
 
     # Route to correct agent and search Chroma
     if any(word in fixed_question for word in biology_keywords):
-        results = chroma_search(fixed_question, "biology_agent")
+        results = weaviate_search(fixed_question, "biology_agent")
         return build_response("biology_agent", question, results, "success")
 
     elif any(word in fixed_question for word in disease_keywords):
-        results = chroma_search(fixed_question, "disease_agent")
+        results = weaviate_search(fixed_question, "disease_agent")
         return build_response("disease_agent", question, results, "success")
 
     elif any(word in fixed_question for word in medicine_keywords):
-        results = chroma_search(fixed_question, "medicine_agent")
+        results = weaviate_search(fixed_question, "medicine_agent")
         return build_response("medicine_agent", question, results, "success")
 
     elif any(word in fixed_question for word in hospital_keywords):
-        results = chroma_search(fixed_question, "hospital_agent")
+        results = weaviate_search(fixed_question, "hospital_agent")
         return build_response("hospital_agent", question, results, "success")
 
     elif any(word in fixed_question for word in nutrition_keywords):
-        results = chroma_search(fixed_question, "nutrition_agent")
+        results = weaviate_search(fixed_question, "nutrition_agent")
         return build_response("nutrition_agent", question, results, "success")
 
     return {

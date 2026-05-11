@@ -2,7 +2,7 @@
 
 from typing import TypedDict, Literal
 from langgraph.graph import StateGraph, END
-from vector_store import chroma_search
+from weaviate_store import weaviate_search
 from langchain_helper import get_agent_answer
 
 # Define the state that flows through the graph
@@ -75,9 +75,9 @@ def retrieval_node(state: AgentState) -> AgentState:
     question = state["enhanced_question"]
 
     if agent == "general_agent":
-        results = chroma_search(question, top_k=3)
+        results = weaviate_search(question, top_k=3)
     else:
-        results = chroma_search(question, agent_name=agent, top_k=3)
+        results = weaviate_search(question, agent_name=agent, top_k=3)
 
     context = "\n".join([r["answer"] for r in results])
 

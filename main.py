@@ -21,9 +21,9 @@ templates = Jinja2Templates(directory="templates")
 # Initialize database on startup
 init_db()
 
-# Auto-rebuild Chroma vector store on startup
-from vector_store import build_vector_store
-build_vector_store()
+# Auto-rebuild weaviate_store on startup
+from weaviate_store import build_weaviate_store
+build_weaviate_store()
 
 # In-memory for current session
 conversation_memory = []

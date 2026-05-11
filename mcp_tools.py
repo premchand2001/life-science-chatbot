@@ -3,7 +3,7 @@
 
 import requests
 from langchain_core.tools import tool
-from vector_store import chroma_search
+from weaviate_store import weaviate_search
 
 # ── MCP Tool Schemas ──────────────────────────────────────────
 # These define the structure of each tool following MCP standards
@@ -165,31 +165,31 @@ MCP_TOOL_SCHEMAS = {
 @tool
 def search_biology_knowledge(query: str, top_k: int = 3) -> list:
     """Search the biology knowledge base for DNA, cells, genes, proteins, CRISPR."""
-    results = chroma_search(query, agent_name="biology_agent", top_k=top_k)
+    results = weaviate_search(query, agent_name="biology_agent", top_k=top_k)
     return results if results else [{"answer": "No results found.", "score": 0, "source": "biology_agent"}]
 
 @tool
 def search_disease_knowledge(query: str, top_k: int = 3) -> list:
     """Search the disease knowledge base for diabetes, cancer, COVID-19, infections."""
-    results = chroma_search(query, agent_name="disease_agent", top_k=top_k)
+    results = weaviate_search(query, agent_name="disease_agent", top_k=top_k)
     return results if results else [{"answer": "No results found.", "score": 0, "source": "disease_agent"}]
 
 @tool
 def search_medicine_knowledge(query: str, top_k: int = 3) -> list:
     """Search the medicine knowledge base for drugs, vaccines, treatments."""
-    results = chroma_search(query, agent_name="medicine_agent", top_k=top_k)
+    results = weaviate_search(query, agent_name="medicine_agent", top_k=top_k)
     return results if results else [{"answer": "No results found.", "score": 0, "source": "medicine_agent"}]
 
 @tool
 def search_hospital_knowledge(query: str, top_k: int = 3) -> list:
     """Search the hospital knowledge base for doctors, nurses, clinics, healthcare."""
-    results = chroma_search(query, agent_name="hospital_agent", top_k=top_k)
+    results = weaviate_search(query, agent_name="hospital_agent", top_k=top_k)
     return results if results else [{"answer": "No results found.", "score": 0, "source": "hospital_agent"}]
 
 @tool
 def search_nutrition_knowledge(query: str, top_k: int = 3) -> list:
     """Search the nutrition knowledge base for vitamins, diet, minerals, food."""
-    results = chroma_search(query, agent_name="nutrition_agent", top_k=top_k)
+    results = weaviate_search(query, agent_name="nutrition_agent", top_k=top_k)
     return results if results else [{"answer": "No results found.", "score": 0, "source": "nutrition_agent"}]
 
 @tool
